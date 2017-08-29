@@ -1,2 +1,2 @@
 # admin
-Runs a console command as administrator - just as sudo on linux
+Runs a console command as administrator - just like 'sudo' on linux/unix.
