@@ -132,10 +132,13 @@ namespace admin
     public static void RunElevated(string path, string args)
     {
       ProcessStartInfo proc = new ProcessStartInfo();
-      proc.UseShellExecute = true;
+      proc.UseShellExecute = false;
       proc.WorkingDirectory = Environment.CurrentDirectory;
       proc.FileName = path;
       proc.Arguments = args;
+      proc.RedirectStandardInput = true;
+      proc.RedirectStandardOutput = true;
+      proc.RedirectStandardError = true;
       
       if (!IsRunAsAdmin || !IsProcessElevated)
       {
