@@ -131,41 +131,36 @@ namespace admin
     /// </summary>
     public static void RunElevated(string path, string args)
     {
-      ProcessStartInfo proc = new ProcessStartInfo();
-      proc.UseShellExecute = false;
-      proc.WorkingDirectory = Environment.CurrentDirectory;
-      proc.FileName = path;
-      proc.Arguments = args;
-      proc.RedirectStandardInput = true;
-      proc.RedirectStandardOutput = true;
-      proc.RedirectStandardError = true;
-      
+      ProcessStartInfo proc = new ProcessStartInfo(path, args)
+      {
+        UseShellExecute = false,
+        WorkingDirectory = Environment.CurrentDirectory,
+        RedirectStandardInput = true,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        CreateNoWindow = false,
+        WindowStyle = ProcessWindowStyle.Normal
+      };
+
       if (!IsRunAsAdmin || !IsProcessElevated)
       {
         // Launch application as administrator
         proc.Verb = "runas";
-
-        try
-        {
-          Process.Start(proc);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine($"Failed to execute the given application with elevated rights. ({e.Message})");
-          Environment.Exit(-1);
-        }
       }
-      else
+
+      var process = new Process() { StartInfo = proc };
+      process.OutputDataReceived += (x, e) => Console.Write(e.Data);
+
+      try
       {
-        try
-        {
-          Process.Start(proc);
-        }
-        catch (Exception e)
-        {
-          Console.WriteLine($"Failed to execute the given application. ({e.Message})");
-          Environment.Exit(-2);
-        }
+        process.Start();
+        process.BeginOutputReadLine();
+        process.WaitForExit();
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine($"Failed to execute the given application with elevated rights. ({e.Message})");
+        Environment.Exit(-1);
       }
     }
   }
